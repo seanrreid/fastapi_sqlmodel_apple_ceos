@@ -1,7 +1,7 @@
 import uvicorn
-from fastapi import FastAPI
-from sqlmodel import Session, select, join, literal_column, func
-from db import engine
+from fastapi import FastAPI, Depends
+from sqlmodel import Session, select
+from db import engine, get_session
 from models.ceos import Ceo
 
 app = FastAPI()
@@ -11,12 +11,11 @@ app = FastAPI()
 async def root():
     return {"message": "Hello World"}
 
-
+# Add Session dependency from db file
 @app.get('/ceos')
-def list_ceos():
-    with Session(engine) as session:
-        statement = select(Ceo)
-        results = session.exec(statement).all()
+def list_ceos(session: Session = Depends(get_session)):
+    statement = select(Ceo)
+    results = session.exec(statement).all()
     return results
 
 
